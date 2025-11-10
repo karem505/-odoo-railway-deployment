@@ -1,0 +1,14 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="salesGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5b5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d7c88;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="22" width="48" height="34" rx="4" fill="url(#salesGrad)" opacity="0.2"/>
+  <path d="M 16,26 L 22,20 L 28,28 L 38,18 L 48,24" fill="none" stroke="url(#salesGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="22" cy="20" r="3" fill="url(#salesGrad)"/>
+  <circle cx="28" cy="28" r="3" fill="url(#salesGrad)"/>
+  <circle cx="38" cy="18" r="3" fill="url(#salesGrad)"/>
+  <circle cx="48" cy="24" r="3" fill="url(#salesGrad)"/>
+</svg>

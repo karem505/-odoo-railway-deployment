@@ -1,0 +1,59 @@
+[options]
+# Database configuration (Railway PostgreSQL via environment variable)
+db_host = ${DB_HOST}
+db_port = ${DB_PORT}
+db_user = ${DB_USER}
+db_password = ${DB_PASSWORD}
+db_name = ${DB_NAME}
+db_maxconn = 64
+db_template = template0
+
+# Server configuration
+addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons
+admin_passwd = ${ODOO_MASTER_PASSWORD}
+http_port = 8069
+http_interface = 0.0.0.0
+
+# Logging
+log_level = info
+log_handler = :INFO
+logfile = False
+log_db = False
+
+# Workers (for Railway scaling)
+workers = ${WORKERS:-2}
+max_cron_threads = 1
+
+# Session and security
+session_store = redis
+session_redis_host = ${REDIS_HOST}
+session_redis_port = ${REDIS_PORT}
+session_redis_password = ${REDIS_PASSWORD}
+session_redis_prefix = odoo_session:
+
+# Limits
+limit_time_cpu = 600
+limit_time_real = 1200
+limit_memory_hard = 2684354560
+limit_memory_soft = 2147483648
+limit_request = 8192
+
+# Proxy mode (Railway handles SSL)
+proxy_mode = True
+
+# Data directory
+data_dir = /var/lib/odoo
+
+# LiveKit integration (loaded from environment)
+# LIVEKIT_API_KEY and LIVEKIT_API_SECRET are accessed via os.environ in the module
+
+# Email configuration (optional - configure via Railway env vars)
+# smtp_server = ${SMTP_SERVER}
+# smtp_port = ${SMTP_PORT}
+# smtp_user = ${SMTP_USER}
+# smtp_password = ${SMTP_PASSWORD}
+# smtp_ssl = ${SMTP_SSL}
+
+# Dev mode (set to False in production)
+dev_mode = False
+list_db = False

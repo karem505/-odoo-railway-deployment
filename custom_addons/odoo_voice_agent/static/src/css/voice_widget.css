@@ -1,0 +1,98 @@
+.voice-widget-container {
+    position: relative;
+}
+
+.voice-widget-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.voice-widget-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.voice-widget-button.active {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 2s infinite;
+}
+
+.voice-widget-button.speaking {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    animation: speaking-pulse 0.8s infinite;
+}
+
+.voice-widget-icon {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+
+.voice-widget-status {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #10b981;
+    border: 2px solid white;
+}
+
+.voice-widget-status.disconnected {
+    background: #ef4444;
+}
+
+.voice-widget-status.recording {
+    background: #f59e0b;
+    animation: blink 1s infinite;
+}
+
+.voice-error {
+    position: absolute;
+    bottom: 50px;
+    right: 0;
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes speaking-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}

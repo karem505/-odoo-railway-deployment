@@ -1,0 +1,35 @@
+# LiveKit Voice Agent Python Dependencies
+
+# LiveKit Core
+livekit==0.17.3
+livekit-api==0.7.1
+livekit-agents==0.10.3
+livekit-plugins-openai==0.8.5
+
+# OpenAI Realtime API
+openai==1.54.3
+
+# Audio processing
+pyaudio==0.2.14
+numpy==1.26.4
+scipy==1.12.0
+
+# Async support
+aiohttp==3.10.5
+asyncio==3.4.3
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Logging and utilities
+structlog==24.1.0
+colorlog==6.8.2
+
+# WebSocket support
+websockets==12.0
+
+# HTTP requests
+requests==2.31.0
+
+# JSON processing
+orjson==3.9.15

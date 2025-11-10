@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="expGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5b5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d7c88;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Receipt/document -->
+  <path d="M 18,12 L 46,12 L 46,52 L 18,52 Z" fill="none" stroke="url(#expGrad)" stroke-width="3"/>
+  <path d="M 18,52 L 22,48 L 26,52 L 30,48 L 34,52 L 38,48 L 42,52 L 46,48 L 46,52" fill="url(#expGrad)"/>
+  <!-- Lines representing text -->
+  <line x1="24" y1="20" x2="40" y2="20" stroke="url(#expGrad)" stroke-width="2"/>
+  <line x1="24" y1="26" x2="40" y2="26" stroke="url(#expGrad)" stroke-width="2"/>
+  <line x1="24" y1="32" x2="36" y2="32" stroke="url(#expGrad)" stroke-width="2"/>
+  <!-- Dollar sign -->
+  <text x="32" y="44" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="url(#expGrad)" text-anchor="middle">$</text>
+</svg>

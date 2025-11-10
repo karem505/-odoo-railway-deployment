@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="linkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5b5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d7c88;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Chain link icon -->
+  <path d="M 25,38 L 18,38 Q 12,38 12,32 Q 12,26 18,26 L 25,26"
+        fill="none" stroke="url(#linkGrad)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 39,26 L 46,26 Q 52,26 52,32 Q 52,38 46,38 L 39,38"
+        fill="none" stroke="url(#linkGrad)" stroke-width="4" stroke-linecap="round"/>
+  <line x1="26" y1="32" x2="38" y2="32" stroke="url(#linkGrad)" stroke-width="4" stroke-linecap="round"/>
+  <!-- Analytics dots -->
+  <circle cx="20" cy="18" r="2.5" fill="url(#linkGrad)"/>
+  <circle cx="32" cy="14" r="2.5" fill="url(#linkGrad)"/>
+  <circle cx="44" cy="18" r="2.5" fill="url(#linkGrad)"/>
+</svg>

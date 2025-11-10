@@ -1,0 +1,122 @@
+# Railway.yaml - Multi-service configuration for Odoo + LiveKit Voice Agent
+
+services:
+  # Odoo Web Service
+  odoo:
+    build:
+      dockerfile: Dockerfile.odoo
+      context: .
+
+    # Resource limits
+    resources:
+      memory: 2048
+      cpu: 2
+
+    # Health check
+    healthcheck:
+      path: /web/health
+      interval: 30
+      timeout: 10
+      retries: 3
+
+    # Port configuration
+    ports:
+      - 8069:8069
+
+    # Environment variables (set via Railway UI or CLI)
+    env:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - ODOO_MASTER_PASSWORD=${ODOO_MASTER_PASSWORD}
+      - ODOO_ADMIN_PASSWORD=${ODOO_ADMIN_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - WORKERS=2
+      - INIT_DATABASE=false
+      - INSTALL_MODULES=""
+      - UPGRADE_MODULES=""
+
+    # Auto-deploy on main branch
+    deploy:
+      branch: main
+      auto_deploy: true
+
+    # Depends on database and redis
+    depends_on:
+      - postgres
+      - redis
+
+    # Restart policy
+    restart: always
+
+  # LiveKit Voice Agent Service
+  livekit-agent:
+    build:
+      dockerfile: Dockerfile.livekit
+      context: .
+
+    # Resource limits
+    resources:
+      memory: 1024
+      cpu: 1
+
+    # Environment variables
+    env:
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ODOO_FRONTEND_URL=${ODOO_SERVICE_URL}
+      - LOG_LEVEL=INFO
+      - ENABLE_HEALTH_CHECK=true
+
+    # Port for health checks
+    ports:
+      - 8080:8080
+
+    # Auto-deploy on main branch
+    deploy:
+      branch: main
+      auto_deploy: true
+
+    # Depends on Odoo service
+    depends_on:
+      - odoo
+
+    # Restart policy
+    restart: always
+
+  # PostgreSQL Database (Railway managed add-on)
+  postgres:
+    image: postgres:15-alpine
+    resources:
+      memory: 512
+      cpu: 0.5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  # Redis Cache (Railway managed add-on)
+  redis:
+    image: redis:7-alpine
+    resources:
+      memory: 256
+      cpu: 0.25
+    volumes:
+      - redis_data:/data
+    restart: always
+
+# Persistent volumes
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Networking
+networks:
+  default:
+    name: odoo-network
+    driver: bridge

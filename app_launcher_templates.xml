@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="app_launcher_page" name="App Launcher Home Page">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+
+                    body {
+                        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        background: linear-gradient(135deg, #0ea5b5 0%, #0d7c88 25%, #1a4d6d 75%, #0c3952 100%);
+                        min-height: 100vh;
+                        position: relative;
+                        overflow-x: hidden;
+                    }
+
+                    /* Dynamic animated background */
+                    body::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background-image:
+                            radial-gradient(circle at 20% 30%, rgba(14, 165, 181, 0.4) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 70%, rgba(13, 124, 136, 0.3) 0%, transparent 50%),
+                            radial-gradient(circle at 50% 50%, rgba(26, 77, 109, 0.2) 0%, transparent 60%);
+                        animation: gradientFlow 20s ease-in-out infinite;
+                        pointer-events: none;
+                    }
+
+                    @keyframes gradientFlow {
+                        0%, 100% {
+                            transform: translate(0, 0) scale(1);
+                            opacity: 1;
+                        }
+                        33% {
+                            transform: translate(5%, -5%) scale(1.1);
+                            opacity: 0.9;
+                        }
+                        66% {
+                            transform: translate(-5%, 5%) scale(1.05);
+                            opacity: 0.95;
+                        }
+                    }
+
+                    /* Floating circles animation */
+                    body::after {
+                        content: '';
+                        position: absolute;
+                        top: -50%;
+                        left: -50%;
+                        width: 200%;
+                        height: 200%;
+                        background-image:
+                            radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                            radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+                        background-size: 50px 50px, 80px 80px;
+                        background-position: 0 0, 40px 40px;
+                        animation: floatPattern 40s linear infinite;
+                        pointer-events: none;
+                    }
+
+                    @keyframes floatPattern {
+                        0% { transform: translate(0, 0); }
+                        100% { transform: translate(100px, 100px); }
+                    }
+
+                    .app-launcher-container {
+                        padding: 30px 20px 60px;
+                        max-width: 1600px;
+                        margin: 0 auto;
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .app-launcher-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 50px;
+                        padding: 28px 40px;
+                        background: rgba(255, 255, 255, 0.98);
+                        border-radius: 24px;
+                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+                        backdrop-filter: blur(16px);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                    }
+
+                    .header-left {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                    }
+
+                    .oravex-logo {
+                        width: 60px;
+                        height: 60px;
+                        object-fit: contain;
+                        filter: drop-shadow(0 4px 8px rgba(14, 165, 181, 0.3));
+                    }
+
+                    .header-text h1 {
+                        font-size: 32px;
+                        font-weight: 800;
+                        background: linear-gradient(135deg, #0ea5b5 0%, #0d7c88 50%, #1a4d6d 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        margin-bottom: 5px;
+                        letter-spacing: -0.5px;
+                    }
+
+                    .company-name {
+                        font-size: 15px;
+                        color: #64748b;
+                        font-weight: 500;
+                    }
+
+                    .header-right {
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    }
+
+                    .logout-btn {
+                        background: linear-gradient(135deg, #0ea5b5 0%, #0d7c88 100%);
+                        color: white;
+                        border: none;
+                        padding: 12px 28px;
+                        border-radius: 12px;
+                        text-decoration: none;
+                        font-size: 15px;
+                        font-weight: 600;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 4px 16px rgba(14, 165, 181, 0.35);
+                    }
+
+                    .logout-btn:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 8px 24px rgba(14, 165, 181, 0.5);
+                        background: linear-gradient(135deg, #0d7c88 0%, #0ea5b5 100%);
+                        color: white;
+                    }
+
+                    .app-launcher-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                        gap: 28px;
+                        padding: 10px;
+                    }
+
+                    .app-card {
+                        background: rgba(255, 255, 255, 0.97);
+                        border-radius: 24px;
+                        padding: 35px 24px;
+                        text-align: center;
+                        cursor: pointer;
+                        text-decoration: none;
+                        color: inherit;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 200px;
+                        position: relative;
+                        overflow: hidden;
+                        border: 2px solid rgba(255, 255, 255, 0.5);
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                    }
+
+                    .app-card::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(135deg, rgba(14, 165, 181, 0.08) 0%, rgba(13, 124, 136, 0.12) 100%);
+                        opacity: 0;
+                        transition: opacity 0.4s ease;
+                    }
+
+                    .app-card:hover {
+                        transform: translateY(-12px) scale(1.03);
+                        box-shadow: 0 16px 48px rgba(14, 165, 181, 0.3), 0 8px 24px rgba(0, 0, 0, 0.1);
+                        border-color: rgba(14, 165, 181, 0.4);
+                    }
+
+                    .app-card:hover::before {
+                        opacity: 1;
+                    }
+
+                    .app-card:active {
+                        transform: translateY(-8px) scale(1.02);
+                    }
+
+                    .app-icon-wrapper {
+                        position: relative;
+                        margin-bottom: 18px;
+                        z-index: 1;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 80px;
+                        height: 80px;
+                        background: linear-gradient(135deg, rgba(14, 165, 181, 0.1) 0%, rgba(13, 124, 136, 0.05) 100%);
+                        border-radius: 20px;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+
+                    .app-card:hover .app-icon-wrapper {
+                        background: linear-gradient(135deg, rgba(14, 165, 181, 0.15) 0%, rgba(13, 124, 136, 0.1) 100%);
+                        transform: rotate(-5deg) scale(1.05);
+                    }
+
+                    .app-icon {
+                        width: 56px;
+                        height: 56px;
+                        object-fit: contain;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+                    }
+
+                    .app-card:hover .app-icon {
+                        transform: scale(1.15);
+                        filter: drop-shadow(0 8px 16px rgba(14, 165, 181, 0.4));
+                    }
+
+                    .app-name {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #1e293b;
+                        margin: 0;
+                        line-height: 1.4;
+                        position: relative;
+                        z-index: 1;
+                        transition: all 0.3s ease;
+                    }
+
+                    .app-card:hover .app-name {
+                        color: #0ea5b5;
+                        transform: translateY(-3px);
+                    }
+
+                    /* Loading animation for icons */
+                    @keyframes shimmer {
+                        0% { opacity: 1; }
+                        50% { opacity: 0.6; }
+                        100% { opacity: 1; }
+                    }
+
+                    .app-icon.loading {
+                        animation: shimmer 1.8s ease-in-out infinite;
+                    }
+
+                    /* Responsive design */
+                    @media (max-width: 1024px) {
+                        .app-launcher-grid {
+                            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                            gap: 24px;
+                        }
+
+                        .app-card {
+                            min-height: 180px;
+                            padding: 30px 20px;
+                        }
+
+                        .app-icon-wrapper {
+                            width: 72px;
+                            height: 72px;
+                        }
+
+                        .app-icon {
+                            width: 52px;
+                            height: 52px;
+                        }
+                    }
+
+                    @media (max-width: 768px) {
+                        .app-launcher-header {
+                            flex-direction: column;
+                            text-align: center;
+                            gap: 20px;
+                            padding: 24px;
+                        }
+
+                        .header-left {
+                            flex-direction: column;
+                            gap: 12px;
+                        }
+
+                        .header-text h1 {
+                            font-size: 26px;
+                        }
+
+                        .oravex-logo {
+                            width: 50px;
+                            height: 50px;
+                        }
+
+                        .app-launcher-grid {
+                            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                            gap: 20px;
+                        }
+
+                        .app-card {
+                            min-height: 160px;
+                            padding: 24px 16px;
+                            border-radius: 20px;
+                        }
+
+                        .app-icon-wrapper {
+                            width: 64px;
+                            height: 64px;
+                        }
+
+                        .app-icon {
+                            width: 48px;
+                            height: 48px;
+                        }
+
+                        .app-name {
+                            font-size: 14px;
+                        }
+                    }
+
+                    /* Add entrance animation */
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(40px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    .app-launcher-header {
+                        animation: fadeIn 0.8s ease-out;
+                    }
+
+                    .app-card {
+                        animation: fadeInUp 0.7s ease-out backwards;
+                    }
+
+                    .app-card:nth-child(1) { animation-delay: 0.05s; }
+                    .app-card:nth-child(2) { animation-delay: 0.1s; }
+                    .app-card:nth-child(3) { animation-delay: 0.15s; }
+                    .app-card:nth-child(4) { animation-delay: 0.2s; }
+                    .app-card:nth-child(5) { animation-delay: 0.25s; }
+                    .app-card:nth-child(6) { animation-delay: 0.3s; }
+                    .app-card:nth-child(7) { animation-delay: 0.35s; }
+                    .app-card:nth-child(8) { animation-delay: 0.4s; }
+                    .app-card:nth-child(9) { animation-delay: 0.45s; }
+                    .app-card:nth-child(10) { animation-delay: 0.5s; }
+                    .app-card:nth-child(11) { animation-delay: 0.55s; }
+                    .app-card:nth-child(12) { animation-delay: 0.6s; }
+                    .app-card:nth-child(n+13) { animation-delay: 0.65s; }
+                </style>
+            </t>
+            <div class="app-launcher-container">
+                <div class="app-launcher-header">
+                    <div class="header-left">
+                        <img src="/app_launcher_home/static/src/img/branding/oravex-logo.png"
+                             alt="Oravex"
+                             class="oravex-logo"
+                             onerror="this.style.display='none'"/>
+                        <div class="header-text">
+                            <h1>ORAVEX</h1>
+                            <div class="company-name">Enterprise Resource Planning</div>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <a href="/web/session/logout" class="logout-btn">Logout</a>
+                    </div>
+                </div>
+                <div class="app-launcher-grid">
+                    <t t-foreach="apps" t-as="app">
+                        <t t-set="app_url">
+                            <t t-if="app.get('action_id')">/web#action=<t t-esc="app['action_id']"/>&amp;menu_id=<t t-esc="app['menu_id']"/></t>
+                            <t t-else="">/web#menu_id=<t t-esc="app['menu_id']"/></t>
+                        </t>
+                        <a t-att-href="app_url" class="app-card" t-if="app['menu_id']">
+                            <div class="app-icon-wrapper">
+                                <img class="app-icon" t-att-src="app['icon']" t-att-alt="app['name']"
+                                     onerror="this.src='/base/static/description/icon.png'"/>
+                            </div>
+                            <p class="app-name"><t t-esc="app['name']"/></p>
+                        </a>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

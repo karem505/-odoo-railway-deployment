@@ -1,0 +1,76 @@
+# Docker ignore file - Exclude unnecessary files from Docker builds
+# This speeds up builds and reduces image size
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+README*.md
+MIGRATION.md
+CLAUDE.md
+
+# Environment files
+.env
+.env.*
+*.pem
+*.key
+SERVER_CREDENTIALS.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Temp files
+temp_files/
+*.tmp
+*.bak
+*.swp
+*~
+
+# Backups
+*.sql
+*.dump
+*.backup
+backups/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Railway
+.railway/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (if any)
+node_modules/
+npm-debug.log
+
+# Docker
+docker-compose.yml
+Dockerfile.*
+!Dockerfile.odoo
+!Dockerfile.livekit

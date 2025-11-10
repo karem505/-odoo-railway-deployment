@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- No additional templates needed - widget is registered via JS -->
+    </data>
+</odoo>

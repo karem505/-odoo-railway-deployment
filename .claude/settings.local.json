@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh:*)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(findstr:*)",
+      "Bash(scp:*)",
+      "Bash(powershell:*)",
+      "Read(//c/Users/Al Saad Nasr City/Desktop/odoo/odoo/custom_addons/app_launcher_home/**)",
+      "mcp__MCP_DOCKER__get_file_contents",
+      "Bash(node --version:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,143 @@
+# Docker Compose for Local Testing
+# This mirrors the Railway deployment for local development
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: odoo-postgres
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo_local_password
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - odoo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: odoo-redis
+    command: redis-server --requirepass redis_local_password
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - odoo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Odoo Web Application
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile.odoo
+    container_name: odoo-web
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database connection (formatted like Railway's DATABASE_URL)
+      DATABASE_URL: postgresql://odoo:odoo_local_password@postgres:5432/postgres
+
+      # Redis connection
+      REDIS_URL: redis://:redis_local_password@redis:6379
+
+      # Odoo configuration
+      ODOO_MASTER_PASSWORD: admin123
+      ODOO_ADMIN_PASSWORD: admin
+      SECRET_KEY: local_secret_key_change_in_production
+      WORKERS: 2
+
+      # LiveKit credentials (use your actual credentials)
+      LIVEKIT_URL: wss://live-agent-9pacbr1x.livekit.cloud
+      LIVEKIT_API_KEY: APIGXGkGsm32tQF
+      LIVEKIT_API_SECRET: RfZNRb5sugVMuTFR47jC87Ts2LfxDT9HVioZVned8YVA
+
+      # Optional: Auto-install modules on first run
+      # INIT_DATABASE: "true"
+      # INSTALL_MODULES: "odoo_voice_agent,app_launcher_home"
+
+    ports:
+      - "8069:8069"
+    volumes:
+      # Mount custom addons for development
+      - ./custom_addons:/mnt/extra-addons
+      # Persist filestore
+      - odoo_filestore:/var/lib/odoo
+    networks:
+      - odoo-network
+    restart: unless-stopped
+
+  # LiveKit Voice Agent
+  livekit-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.livekit
+    container_name: odoo-livekit-agent
+    depends_on:
+      - odoo
+    environment:
+      # LiveKit credentials
+      LIVEKIT_URL: wss://live-agent-9pacbr1x.livekit.cloud
+      LIVEKIT_API_KEY: APIGXGkGsm32tQF
+      LIVEKIT_API_SECRET: RfZNRb5sugVMuTFR47jC87Ts2LfxDT9HVioZVned8YVA
+
+      # OpenAI API Key (replace with your actual key)
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+      # Odoo frontend URL
+      ODOO_FRONTEND_URL: http://odoo:8069
+
+      # Logging
+      LOG_LEVEL: INFO
+      ENABLE_HEALTH_CHECK: "true"
+
+    ports:
+      - "8080:8080"
+    networks:
+      - odoo-network
+    restart: unless-stopped
+
+# Volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  odoo_filestore:
+    driver: local
+
+# Network
+networks:
+  odoo-network:
+    driver: bridge
+
+# Usage:
+# 1. Create .env file with your OPENAI_API_KEY
+# 2. Run: docker-compose up -d
+# 3. Access Odoo at http://localhost:8069
+# 4. Default credentials: admin / admin (first setup)
+# 5. Install the odoo_voice_agent module from Apps menu
+# 6. Click microphone icon to test voice navigation
+#
+# Stop: docker-compose down
+# Stop and remove volumes: docker-compose down -v
+# View logs: docker-compose logs -f [service_name]

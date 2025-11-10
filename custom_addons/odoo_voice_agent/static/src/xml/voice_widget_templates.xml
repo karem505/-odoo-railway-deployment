@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="odoo_voice_agent.VoiceWidget" owl="1">
+        <div class="voice-widget-container">
+            <button
+                class="voice-widget-button"
+                t-att-class="{
+                    'active': state.isRecording,
+                    'speaking': state.isSpeaking
+                }"
+                t-on-click="toggleConnection"
+                title="Voice Navigation Assistant">
+
+                <!-- Microphone Icon -->
+                <svg class="voice-widget-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+
+                <!-- Status Indicator -->
+                <div
+                    class="voice-widget-status"
+                    t-att-class="{
+                        'disconnected': !state.isConnected,
+                        'recording': state.isRecording
+                    }">
+                </div>
+            </button>
+
+            <!-- Error Message -->
+            <div t-if="state.error" class="voice-error">
+                <t t-esc="state.error"/>
+            </div>
+        </div>
+    </t>
+
+</templates>
