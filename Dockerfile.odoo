@@ -19,12 +19,10 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
 # Create custom addons directory
-RUN mkdir -p /mnt/extra-addons/odoo_voice_agent \
-    && mkdir -p /mnt/extra-addons/app_launcher_home
+RUN mkdir -p /mnt/extra-addons
 
-# Copy custom addons
-COPY ./custom_addons/odoo_voice_agent /mnt/extra-addons/odoo_voice_agent/
-COPY ./custom_addons/app_launcher_home /mnt/extra-addons/app_launcher_home/
+# Copy custom addons (copy entire directory to preserve structure)
+COPY ./custom_addons /mnt/extra-addons/
 
 # Copy Odoo configuration template
 COPY odoo.conf.template /etc/odoo/odoo.conf.template
