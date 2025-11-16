@@ -1,15 +1,14 @@
-# LiveKit Voice Agent for Odoo - Railway Deployment
-FROM python:3.11-slim
+# LiveKit Voice Agent for Odoo - Multi-stage build
+# Stage 1: Builder
+FROM python:3.11-slim as builder
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     portaudio19-dev \
-    ffmpeg \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
@@ -18,6 +17,23 @@ COPY livekit-requirements.txt /app/requirements.txt
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Runtime
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    portaudio19-dev \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Create necessary directories
 RUN mkdir -p /app/prompts
@@ -29,6 +45,11 @@ COPY livekit-agent/prompts/agent_instructions.txt /app/prompts/agent_instruction
 # Copy entrypoint script
 COPY entrypoint-livekit.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+
+# Create non-root user for security
+RUN useradd -m -u 1000 livekit && \
+    chown -R livekit:livekit /app
+USER livekit
 
 # Expose port (if needed for health checks)
 EXPOSE 8080
