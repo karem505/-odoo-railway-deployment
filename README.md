@@ -1,15 +1,78 @@
-# 📚 Odoo AWS Documentation
+# 🚀 Odoo 18 + LiveKit Voice Agent - Dockerized
 
-**Complete documentation for Odoo 18 development on AWS EC2**
+**Fully Dockerized Odoo 18 ERP with AI Voice Navigation (Arabic/English)**
+
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
+[![Odoo](https://img.shields.io/badge/Odoo-18.0-purple?logo=odoo)](https://www.odoo.com/)
+[![LiveKit](https://img.shields.io/badge/LiveKit-Voice%20Agent-green?logo=webrtc)](https://livekit.io/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-Realtime%20API-orange?logo=openai)](https://openai.com/)
+
+---
+
+## 📦 Docker Deployment (Recommended)
+
+### Quick Start - 3 Minutes
+
+```bash
+# 1. Clone repository
+git clone https://github.com/karem505/-odoo-railway-deployment.git
+cd -odoo-railway-deployment
+
+# 2. Create environment file
+cp .env.example .env
+nano .env  # Add your OPENAI_API_KEY
+
+# 3. Start with Make
+make dev-up
+
+# 4. Or start with Docker Compose
+docker-compose up -d
+
+# 5. Access Odoo
+# http://localhost:8069
+```
+
+### 📚 Docker Documentation
+
+- **[DOCKER_QUICKSTART.md](./DOCKER_QUICKSTART.md)** - 3-minute quick start guide
+- **[DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md)** - Complete deployment guide
+- **[Makefile](./Makefile)** - All available commands (`make help`)
+
+### 🎯 What You Get
+
+✅ **Odoo 18** - Latest ERP with custom modules
+✅ **PostgreSQL 15** - Database backend
+✅ **Redis 7** - Session and cache storage
+✅ **LiveKit Voice Agent** - AI voice navigation (Arabic/English)
+✅ **Multi-stage builds** - Optimized Docker images
+✅ **Health checks** - All services monitored
+✅ **Production ready** - Complete with backups, logging, scaling
+
+### 🎤 Voice Agent Features
+
+- **Bilingual**: Arabic and English voice commands
+- **Hands-free**: Voice navigation between Odoo modules
+- **Real-time**: LiveKit + OpenAI Realtime API
+- **Secure**: Token-based authentication
+
+Try saying:
+- 🇬🇧 "Open sales"
+- 🇬🇧 "Show me CRM"
+- 🇸🇦 "افتح المبيعات"
+- 🇸🇦 "اعرض المخزون"
 
 ---
 
 ## 📖 Documentation Index
 
-This folder contains all documentation needed for developing and deploying Odoo on AWS.
+### 🐳 Docker Deployment (Recommended)
+- **[DOCKER_QUICKSTART.md](./DOCKER_QUICKSTART.md)** - Get started in 3 minutes
+- **[DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md)** - Complete Docker deployment guide
+- **[docker-compose.yml](./docker-compose.yml)** - Development configuration
+- **[docker-compose.prod.yml](./docker-compose.prod.yml)** - Production configuration
+- **[Makefile](./Makefile)** - Easy commands (`make help`)
 
-### 🚀 Quick Start
-Start here if you're new to the project:
+### ☁️ AWS EC2 Deployment (Legacy)
 - **[QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)** - Get up and running in 5 minutes
 
 ### 📘 Main Documentation

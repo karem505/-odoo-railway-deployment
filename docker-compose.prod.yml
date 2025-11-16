@@ -1,0 +1,287 @@
+# Production Docker Compose Configuration
+# For production deployments with best practices
+#
+# Usage:
+#   docker-compose -f docker-compose.prod.yml up -d
+#
+# IMPORTANT:
+#   - Create .env file with production credentials
+#   - Use strong passwords and secrets
+#   - Configure backups for volumes
+#   - Monitor resources and logs
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database with optimizations
+  postgres:
+    image: postgres:15-alpine
+    container_name: odoo-postgres-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # REQUIRED in .env
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      # Performance tuning
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups  # For database backups
+    networks:
+      - odoo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-odoo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    # Security: Don't expose port in production
+    # ports:
+    #   - "5432:5432"
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: odoo-redis-prod
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    networks:
+      - odoo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Odoo Web Application
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile.odoo
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    image: ${DOCKER_REGISTRY:-}odoo-app:${VERSION:-latest}
+    container_name: odoo-web-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database connection (Railway format)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-odoo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}
+
+      # Redis connection
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+
+      # Odoo configuration
+      ODOO_MASTER_PASSWORD: ${ODOO_MASTER_PASSWORD}  # REQUIRED
+      SECRET_KEY: ${SECRET_KEY}  # REQUIRED - min 32 chars
+      WORKERS: ${WORKERS:-4}
+
+      # LiveKit credentials
+      LIVEKIT_URL: ${LIVEKIT_URL}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+
+      # Production settings
+      INIT_DATABASE: "false"
+      INSTALL_MODULES: ""
+      UPGRADE_MODULES: ""
+
+      # Optional: Email configuration
+      SMTP_SERVER: ${SMTP_SERVER:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SSL: ${SMTP_SSL:-true}
+
+    ports:
+      - "${ODOO_PORT:-8069}:8069"
+    volumes:
+      # Persist filestore (user uploads, attachments)
+      - odoo_filestore:/var/lib/odoo
+      # Optional: Mount custom addons for development
+      # - ./custom_addons:/mnt/extra-addons:ro
+    networks:
+      - odoo-network
+    restart: always
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # LiveKit Voice Agent
+  livekit-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.livekit
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    image: ${DOCKER_REGISTRY:-}livekit-agent:${VERSION:-latest}
+    container_name: odoo-livekit-agent-prod
+    depends_on:
+      odoo:
+        condition: service_healthy
+    environment:
+      # LiveKit credentials
+      LIVEKIT_URL: ${LIVEKIT_URL}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+
+      # OpenAI API Key
+      OPENAI_API_KEY: ${OPENAI_API_KEY}  # REQUIRED
+
+      # Odoo frontend URL (use actual domain in production)
+      ODOO_FRONTEND_URL: ${ODOO_FRONTEND_URL:-http://odoo:8069}
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENABLE_HEALTH_CHECK: "true"
+
+    networks:
+      - odoo-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Nginx reverse proxy with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: odoo-nginx-prod
+    depends_on:
+      - odoo
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - odoo-network
+    restart: always
+    # Uncomment to enable nginx
+    profiles:
+      - with-nginx
+
+# Volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+    # Optional: Use external volume for backups
+    # external: true
+    # name: odoo_postgres_data
+  redis_data:
+    driver: local
+  odoo_filestore:
+    driver: local
+  nginx_logs:
+    driver: local
+
+# Network
+networks:
+  odoo-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+# Production Deployment Checklist:
+# ================================
+#
+# 1. SECURITY:
+#    ☐ Create .env file with strong passwords (never commit to Git)
+#    ☐ Set SECRET_KEY (min 32 random characters)
+#    ☐ Set ODOO_MASTER_PASSWORD (min 20 characters)
+#    ☐ Set strong POSTGRES_PASSWORD and REDIS_PASSWORD
+#    ☐ Don't expose database ports externally
+#    ☐ Use HTTPS with SSL certificates (nginx or reverse proxy)
+#
+# 2. CONFIGURATION:
+#    ☐ Set WORKERS based on CPU cores (formula: (cores * 2) + 1)
+#    ☐ Configure ODOO_FRONTEND_URL to your actual domain
+#    ☐ Set up SMTP for email notifications
+#    ☐ Configure LiveKit and OpenAI credentials
+#
+# 3. INFRASTRUCTURE:
+#    ☐ Set up automated backups for postgres_data volume
+#    ☐ Set up monitoring (Prometheus, Grafana, or similar)
+#    ☐ Configure log aggregation
+#    ☐ Set up health check alerts
+#    ☐ Configure firewall rules
+#
+# 4. DEPLOYMENT:
+#    ☐ Build images: docker-compose -f docker-compose.prod.yml build
+#    ☐ Start services: docker-compose -f docker-compose.prod.yml up -d
+#    ☐ Check logs: docker-compose -f docker-compose.prod.yml logs -f
+#    ☐ Verify health: docker-compose -f docker-compose.prod.yml ps
+#
+# 5. POST-DEPLOYMENT:
+#    ☐ Access Odoo at http://your-domain:8069
+#    ☐ Complete Odoo setup wizard
+#    ☐ Install required modules (odoo_voice_agent, app_launcher_home)
+#    ☐ Test voice agent functionality
+#    ☐ Configure scheduled backups
+#
+# 6. MAINTENANCE:
+#    ☐ Regular security updates: docker-compose pull && docker-compose up -d
+#    ☐ Monitor disk usage for volumes
+#    ☐ Review logs regularly
+#    ☐ Test backup restoration procedure
+#
+# Commands:
+# ---------
+# Start:     docker-compose -f docker-compose.prod.yml up -d
+# Stop:      docker-compose -f docker-compose.prod.yml down
+# Logs:      docker-compose -f docker-compose.prod.yml logs -f [service]
+# Restart:   docker-compose -f docker-compose.prod.yml restart [service]
+# Backup DB: docker exec odoo-postgres-prod pg_dump -U odoo postgres > backup.sql
+# Restore:   docker exec -i odoo-postgres-prod psql -U odoo postgres < backup.sql

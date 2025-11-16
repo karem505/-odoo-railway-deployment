@@ -1,22 +1,41 @@
-# Odoo 18 with LiveKit Integration - Railway Deployment
-FROM odoo:18.0
+# Odoo 18 with LiveKit Integration - Multi-stage build
+# Stage 1: Builder
+FROM odoo:18.0 as builder
 
 # Switch to root for installations
 USER root
 
-# Install additional system dependencies
-RUN apt-get update && apt-get install -y \
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     python3-dev \
     build-essential \
     libpq-dev \
     git \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies for LiveKit
+# Copy and install Python dependencies
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r /tmp/requirements.txt
+
+# Stage 2: Runtime
+FROM odoo:18.0
+
+# Switch to root for system setup
+USER root
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip \
+    libpq-dev \
+    curl \
+    gettext-base \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
 # Create custom addons directory
 RUN mkdir -p /mnt/extra-addons
@@ -32,10 +51,17 @@ COPY entrypoint-odoo.sh /entrypoint-odoo.sh
 RUN chmod +x /entrypoint-odoo.sh
 
 # Set ownership
-RUN chown -R odoo:odoo /mnt/extra-addons
+RUN chown -R odoo:odoo /mnt/extra-addons /var/lib/odoo
+
+# Create log directory (if not exists)
+RUN mkdir -p /var/log/odoo && chown odoo:odoo /var/log/odoo
 
 # Expose Odoo port
 EXPOSE 8069
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8069/web/health || exit 1
 
 # Switch back to odoo user
 USER odoo
